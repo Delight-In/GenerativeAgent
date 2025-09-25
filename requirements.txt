@@ -7,3 +7,4 @@ python-docx
 PyPDF2 
 pdfplumber
 streamlit
+nltk

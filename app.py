@@ -1,7 +1,8 @@
 import os
 import streamlit as st
 from sentence_transformers import SentenceTransformer
-# from files import *
+import nltk                                                                     
+nltk.download('punkt') 
 
 # Assuming these are defined in your codebase
 from files import (
@@ -41,7 +42,7 @@ if uploaded_file:
     with open(file_path, "wb") as f:
         f.write(uploaded_file.read())
 else:
-    file_name = "data/Doc1.docx"
+    file_name = r"data/Doc1.docx"
     file_path = os.path.join("default_docs", file_name)
 
     # You can include your default file in a `default_docs/` folder
