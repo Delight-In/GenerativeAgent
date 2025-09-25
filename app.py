@@ -34,7 +34,7 @@ if "llm" not in st.session_state:
 # --- File Upload ---
 uploaded_file = st.file_uploader("Upload a document (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
 
-# Use default document if none uploaded
+# Upload or use default
 if uploaded_file:
     file_name = uploaded_file.name
     file_path = f"temp_uploads/{file_name}"
@@ -45,24 +45,22 @@ else:
     file_name = r"data/Doc1.docx"
     file_path = os.path.join("default_docs", file_name)
 
-    # You can include your default file in a `default_docs/` folder
     if not os.path.exists(file_path):
         st.warning("Default document not found. Please upload a file.")
         st.stop()
     else:
         st.info("📄 Using default document: `Doc1.docx`")
 
-# Index the document only once
+# Indexing (done only once per document)
 if "indexed_file" not in st.session_state or st.session_state.indexed_file != file_name:
     st.session_state.collection = get_chroma_collection(st.session_state.embedder)
     index_document(file_path, st.session_state.embedder, st.session_state.collection)
     st.session_state.indexed_file = file_name
     st.success(f"✅ Indexed: {file_name}")
 
-
-    # --- Chat Interface ---
+# ✅ Always show chat UI after indexing
+if st.session_state.collection:
     st.subheader("Ask a question about the document")
-
     question = st.text_input("❓ Your question")
 
     if question:
@@ -70,7 +68,6 @@ if "indexed_file" not in st.session_state or st.session_state.indexed_file != fi
             in_context, retrieved_chunks, _ = search_similar_chunks(
                 question, st.session_state.embedder, st.session_state.collection
             )
-
             prompt = build_prompt(question, retrieved_chunks, in_context)
             answer = run_llm(st.session_state.llm, prompt)
 
@@ -79,6 +76,7 @@ if "indexed_file" not in st.session_state or st.session_state.indexed_file != fi
 
         except Exception as e:
             st.error(f"❌ Error occurred: {e}")
+
 
 # --- Display Chat History ---
 if st.session_state.chat_history:
