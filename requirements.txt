@@ -6,3 +6,4 @@ llama-cpp-python
 python-docx 
 PyPDF2 
 pdfplumber
+streamlit
