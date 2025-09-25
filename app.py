@@ -33,20 +33,31 @@ if "llm" not in st.session_state:
 # --- File Upload ---
 uploaded_file = st.file_uploader("Upload a document (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
 
+# Use default document if none uploaded
 if uploaded_file:
-    file_path = f"temp_uploads/{uploaded_file.name}"
-
-    # Save uploaded file
+    file_name = uploaded_file.name
+    file_path = f"temp_uploads/{file_name}"
     os.makedirs("temp_uploads", exist_ok=True)
     with open(file_path, "wb") as f:
         f.write(uploaded_file.read())
+else:
+    file_name = "data/Doc1.docx"
+    file_path = os.path.join("default_docs", file_name)
 
-    # Index the document only once
-    if "indexed_file" not in st.session_state or st.session_state.indexed_file != uploaded_file.name:
-        st.session_state.collection = get_chroma_collection(st.session_state.embedder)
-        index_document(file_path, st.session_state.embedder, st.session_state.collection)
-        st.session_state.indexed_file = uploaded_file.name
-        st.success("✅ Document indexed successfully!")
+    # You can include your default file in a `default_docs/` folder
+    if not os.path.exists(file_path):
+        st.warning("Default document not found. Please upload a file.")
+        st.stop()
+    else:
+        st.info("📄 Using default document: `Doc1.docx`")
+
+# Index the document only once
+if "indexed_file" not in st.session_state or st.session_state.indexed_file != file_name:
+    st.session_state.collection = get_chroma_collection(st.session_state.embedder)
+    index_document(file_path, st.session_state.embedder, st.session_state.collection)
+    st.session_state.indexed_file = file_name
+    st.success(f"✅ Indexed: {file_name}")
+
 
     # --- Chat Interface ---
     st.subheader("Ask a question about the document")
